@@ -1,4 +1,5 @@
-# Analytics KPI -01: percentage distribution of customers in each state.
+/*# Analytics KPI -01: percentage distribution of customers in each state.*/
+
 SELECT 
     customer_state,
     CONCAT(ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM olist_customers_dataset), 2), ' %') AS percentage
@@ -9,7 +10,7 @@ GROUP BY
 order by 
     COUNT(*) desc;
 
-#Analytics KPI - 02: Order Rate per date.
+/*#Analytics KPI - 02: Order Rate per date.*/
 SELECT 
     DATE(order_purchase_timestamp) AS order_date,
     COUNT(order_id) AS order_count,
@@ -20,8 +21,9 @@ GROUP BY
     DATE(order_purchase_timestamp)
 ORDER BY 
     order_rate_percentage desc;
+    
 
-# Analytics KPI - 03 Cancellation Rate
+/* # Analytics KPI - 03 Cancellation Rate*/
 SELECT 
 	date(order_purchase_timestamp) as order_date,
     CONCAT(COUNT(order_id) * 100.0 / (SELECT COUNT(*) FROM olist_orders_dataset), ' %') AS cancellation_rate
@@ -34,7 +36,7 @@ GROUP BY
 order by 
 	cancellation_rate desc;
 
-#Analytics KPI - 04: Delivery Rate
+/* #Analytics KPI - 04: Delivery Rate*/
 SELECT 
 	date(order_purchase_timestamp) as order_date,
     CONCAT(ROUND(COUNT(order_id) * 100.0 / (SELECT COUNT(*) FROM olist_orders_dataset), 2), ' %') AS delivery_rate
@@ -47,7 +49,7 @@ GROUP BY
 order by 
 	delivery_rate desc;
 
-#Analytics KPI – 05: Average Delivery Rate. 
+/* #Analytics KPI – 05: Average Delivery Rate. */
 SELECT date(order_purchase_timestamp) as order_date,
     AVG(DATEDIFF(order_delivered_customer_date, order_purchase_timestamp)) AS average_delivery_time
 FROM 
@@ -59,7 +61,7 @@ order_date
 order by 
  average_delivery_time DESC;
 
-#Analytics KPI – 06: Total Order Value based on order date.
+/* #Analytics KPI – 06: Total Order Value based on order date.*/
 SELECT 
 date(order_purchase_timestamp) as order_date,
 round(sum((price)),2) AS total_order_value
@@ -72,20 +74,26 @@ order_date
 order by 
 total_order_value desc;
 
-# Analytics KPI – 07 Items Per Order. 
+/* # Analytics KPI – 07 Items Per Order. */
 SELECT 
-    order_id, COUNT(*) AS items_per_order
+    date(order_purchase_timestamp) as order_date, avg(item_count) AS avg_items_per_order
 FROM 
-    olist_order_items_dataset
+    olist_orders_dataset as tb1
+left join 
+	(SELECT order_id, COUNT(order_item_id) AS item_count
+    From
+      olist_order_items_dataset
+    GROUP BY 
+    order_id) tb2 on tb1.order_id=tb2.order_id
 GROUP BY 
-    order_id
+    order_date
 ORDER BY
-items_per_order desc;
+order_date asc;
 
-#Analytics KPI – 08 Average Product Price per order.
+/* #Analytics KPI – 08 Average Product Price per order.*/
 SELECT 
 tb2.order_id,
-round(avg(price),2) AS average_product_price
+round(avg(price),2) AS average_product_price,date(order_purchase_timestamp) as order_date
 FROM 
 olist_order_items_dataset as tb1
 left join olist_orders_dataset as tb2 
@@ -93,9 +101,9 @@ on tb1.order_id=tb2.order_id
 group by 
 tb2.order_id
 order by
-average_product_price desc;
+order_date asc;
 
-#Analytics KPI – 09 Highest Category Sales Value. 
+/* #Analytics KPI – 09 Highest Category Sales Value. */
 
   SELECT 
 product_category_name, round(SUM(price)) AS total_sales
@@ -108,7 +116,7 @@ product_category_name
 ORDER BY 
 total_sales DESC;
 
-#Analytics KPI – 10 Average Freight Value Per Order. 
+/* #Analytics KPI – 10 Average Freight Value Per Order. */
 SELECT order_id,
     AVG(freight_value) AS average_freight_value
 FROM 
@@ -118,7 +126,7 @@ group by 1;
 SELECT 
 date(order_purchase_timestamp) as order_date,
 tb2.order_id,
-AVG(freight_value) AS average_freight_value
+AVG(freight_value) AS average_freight_value, avg(price) as avg_price
 FROM 
 olist_order_items_dataset as tb1
 left join olist_orders_dataset as tb2 
@@ -128,7 +136,7 @@ tb2.order_id
 order by 
 average_freight_value desc;
 
-# Analytics KPI – 11 Common Payment Type. 
+/*# Analytics KPI – 11 Common Payment Type. */
 SELECT 
     payment_type, COUNT(*) AS count
 FROM 
@@ -138,21 +146,28 @@ GROUP BY
 ORDER BY 
     count DESC;
 
-#Analytics KPI – 12 Payment Value Per Order.
+/*#Analytics KPI – 12 Payment Value Per Order.*/
 SELECT
-	order_id, sum(payment_value) as total_payment_value
-from
-	olist_order_payments_dataset
-group by
-	order_id
-order by
-	total_payment_value desc;
+    tb_1.order_id,
+    SUM(tb_1.payment_value) AS total_payment_value,
+    DATE(tb_2.order_purchase_timestamp) AS order_date
+FROM
+    olist_order_payments_dataset AS tb_1
+INNER JOIN
+    olist_orders_dataset AS tb_2
+    ON tb_1.order_id = tb_2.order_id
+GROUP BY
+    tb_1.order_id
+ORDER BY
+    total_payment_value asc;
 
-# Analytics KPI – 13 Average Installment Payment Value.
-SELECT tb2.order_purchase_timestamp,customer_id ,tb2.order_id, AVG(payment_value / payment_installments) AS average_installment_value
+
+/*# Analytics KPI – 13 Average Installment Payment Value.*/
+SELECT tb2.order_purchase_timestamp,customer_id ,tb2.order_id,tb4.product_category_name, AVG(payment_value / payment_installments) AS average_installment_value
  FROM olist_order_payments_dataset as tb1 
- left join olist_orders_dataset as tb2 
-on tb1.order_id=tb2.order_id
+ left join olist_orders_dataset as tb2 on tb1.order_id=tb2.order_id
+left join  olist_order_items_dataset as tb3 on tb2.order_id=tb3.order_id
+left join olist_products_dataset as tb4 on tb3.product_id=tb4.product_id
 group by 
 tb2.order_id 
 order by 
@@ -168,7 +183,7 @@ GROUP BY
 ORDER BY 
     count DESC; 
 
-# Analytics KPI - 17 Average Price Of Products In Each Category
+/*# Analytics KPI - 15 Average Price Of Products In Each Category*/
 SELECT 
     product_category_name, round(AVG(price),2) AS average_price ,count(product_category_name) as count_product_category_ordered
 FROM 
@@ -180,21 +195,23 @@ GROUP BY
 order by 
 	average_price desc;
     
-  # KPI - 16 Highest Product Review Score.
-  select ftb.product_id,max(ftb.review_score) as highest_review_score,
+/*  # KPI - 16 Highest Product Review Score.*/
+  select ftb.product_id,max(ftb.review_score) as highest_review_score,ftb.product_category_name,
 min(ftb.review_score) as minimum_review_score,avg  
-(ftb.review_score) as avg_review_score 
+(ftb.review_score) as avg_review_score,count(ftb.review_score) as count_score 
 from(
-SELECT tb1.order_id,tb2.order_item_id,tb2.product_id,tb1.review_score
+SELECT tb1.order_id,tb2.order_item_id,tb2.product_id,tb1.review_score,product_category_name
 FROM olist_order_reviews_dataset as tb1
 left join olist_order_items_dataset as tb2
 on tb1.order_id=tb2.order_id
 left join olist_products_dataset as tb3
 on tb2.product_id=tb3.product_id
+where tb1.review_score <5
 ) as ftb 
-group by 1;
+group by 1
+order by avg_review_score desc;
     
-# Analytics KPI – 17 Delivery Performance.  
+/*# Analytics KPI – 17 Delivery Performance.  */
   SELECT 
     order_id, order_estimated_delivery_date,order_delivered_customer_date,
     DATEDIFF(order_delivered_customer_date, order_estimated_delivery_date) AS delivery_performance
@@ -204,7 +221,7 @@ WHERE
     order_delivered_customer_date IS NOT NULL
 order by delivery_performance desc;
 
-# Analytics KPI – 18 Relationship Between Product Categories and Payment Methods.
+/*# Analytics KPI – 18 Relationship Between Product Categories and Payment Methods.*/
 SELECT 
     product_category_name, payment_type, COUNT(*) AS count_users
 FROM 
@@ -217,7 +234,7 @@ GROUP BY
     product_category_name, payment_type
 order by count_users desc;
 
-#Analytics KPI - 19 Correlation Between Review Scores And Product Prices
+/*#Analytics KPI - 19 Correlation Between Review Scores And Product Prices*/
 select tb1.review_score, avg(tb1.price) as avg_price
 from(
 select tb2.product_id,max(tb2.review_score) as review_score,max(tb2.price) as price
@@ -233,7 +250,7 @@ group by tb2.product_id
 )as tb1
 group by tb1.review_score;
 
-# Analytics KPI – 20 Top-Selling Product Categories.
+/*# Analytics KPI – 20 Top-Selling Product Categories.*/
 SELECT 
     product_category_name, round(SUM(price),2) AS total_sales
 FROM 
@@ -245,7 +262,7 @@ GROUP BY
 ORDER BY 
     total_sales DESC;
 
-# Analytics KPI – 21 The Unique Customers.
+/* # Analytics KPI – 21 The Unique Customers.*/
 SELECT COUNT(DISTINCT customer_unique_id) AS unique_customers_count
 FROM olist_customers_dataset;
 
