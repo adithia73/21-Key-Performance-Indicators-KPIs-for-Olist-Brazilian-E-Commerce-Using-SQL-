@@ -51,8 +51,8 @@ This PDF provides an overview of key performance indicators (KPIs) relevant to O
 ## Usage
 
 1. **Set up your database**: Ensure you have a MySQL database set up and ready to receive data.
-2. **Load data**: Use the `load_data.sql` script to load data from the CSV files into your database.
-3. **Run KPI queries**: Execute the queries in `kpi_queries.sql` to calculate and analyze the KPIs.
+2. **Load data**: Use the `Olist_csv_to_sql.sql` script to load data from the CSV files into your database.
+3. **Run 21 KPI queries**: Execute the queries in `21_KPI_ Query.sql` to calculate and analyze the KPIs.
 
 ## Dataset
 
