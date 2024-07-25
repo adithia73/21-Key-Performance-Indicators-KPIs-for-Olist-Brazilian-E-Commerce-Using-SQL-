@@ -14,7 +14,7 @@ This repository contains SQL scripts and documentation to analyze 21 key perform
 
 ## Files
 
-### 1. load_data.sql
+### 1. Olist_csv_to_sql.sql
 This SQL script contains commands to load data from CSV files into the database. It includes the creation of tables and the insertion of data from the provided CSV files. Use this script to set up your database before running the KPI queries.
 
 ```sql
@@ -27,7 +27,7 @@ LINES TERMINATED BY '\n'
 IGNORE 1 ROWS;
 ```
 
-### 2. kpi_queries.sql
+### 2. 21_KPI_ Query.sql
 This SQL script includes 21 queries to calculate key performance indicators for Olist's eCommerce operations. Each query is designed to provide insights into different aspects of the business, such as sales performance, customer behavior, and operational efficiency.
 
 ```sql
@@ -45,7 +45,7 @@ order by
 	delivery_rate desc;
 ```
 
-### 3. Understanding_KPIs_Olist.pdf
+### 3. 21 Analytics KPI.pdf
 This PDF provides an overview of key performance indicators (KPIs) relevant to Olist's eCommerce operations. It explains the importance of each KPI, how they are measured, and their impact on business performance. Detailed descriptions for all 21 KPIs are included.
 
 ## Usage
